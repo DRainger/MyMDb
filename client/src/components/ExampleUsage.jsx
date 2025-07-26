@@ -1,4 +1,4 @@
-import { useAuthStore } from '../store/authStore'
+import useAuthStore from '../store/authStore'
 
 const ExampleUsage = () => {
   const { user, token, login, logout, loading } = useAuthStore()

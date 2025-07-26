@@ -1,13 +1,11 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 import NavBar from './NavBar'
-
-// TODO: יבא את הרכיבים הנדרשים (Navbar, Footer)
-// TODO: הגדר את המבנה הכללי של הדף
+import Footer from './Footer'
 
 const Layout = () => {
   return (
-    <div className="page-container">
+    <div className="page-container bg-primary">
       <NavBar />
       
       <main className="content-wrapper">
@@ -16,7 +14,7 @@ const Layout = () => {
         </div>
       </main>
       
-      {/* TODO: הוסף Footer */}
+      <Footer />
     </div>
   )
 }
