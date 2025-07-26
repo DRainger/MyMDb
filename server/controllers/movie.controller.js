@@ -1,30 +1,37 @@
-import axios from 'axios'
-import { config } from '../config/index.js'
-
-const OMDB_BASE_URL = 'http://www.omdbapi.com/'
+import { MovieService } from '../services/index.js'
 
 export const searchMovies = async (req, res, next) => {
   try {
-    const { q } = req.query
-    if (!q) return res.status(400).json({ message: 'Query is required' })
-    const omdbRes = await axios.get(OMDB_BASE_URL, {
-      params: { apikey: config.omdbApiKey, s: q }
-    })
-    res.json(omdbRes.data)
+    const result = await MovieService.searchMovies(req.query.q)
+    res.json(result)
   } catch (err) {
-    next(err)
+    res.status(400).json({ message: err.message })
   }
 }
 
 export const getMovieById = async (req, res, next) => {
   try {
-    const { imdbId } = req.params
-    if (!imdbId) return res.status(400).json({ message: 'imdbId is required' })
-    const omdbRes = await axios.get(OMDB_BASE_URL, {
-      params: { apikey: config.omdbApiKey, i: imdbId }
-    })
-    res.json(omdbRes.data)
+    const result = await MovieService.getMovieById(req.params.imdbId)
+    res.json(result)
   } catch (err) {
-    next(err)
+    res.status(400).json({ message: err.message })
+  }
+}
+
+export const getMovieWithFullPlot = async (req, res, next) => {
+  try {
+    const result = await MovieService.getMovieWithFullPlot(req.params.imdbId)
+    res.json(result)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+}
+
+export const searchMoviesAdvanced = async (req, res, next) => {
+  try {
+    const result = await MovieService.searchMoviesAdvanced(req.query)
+    res.json(result)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
   }
 } 

@@ -1,9 +1,23 @@
 import express from 'express'
-import { searchMovies, getMovieById } from '../controllers/movie.controller.js'
+import { 
+  searchMovies, 
+  getMovieById, 
+  getMovieWithFullPlot, 
+  searchMoviesAdvanced 
+} from '../controllers/movie.controller.js'
 
 const router = express.Router()
 
+// Basic search
 router.get('/search', searchMovies)
+
+// Advanced search with filters
+router.get('/search/advanced', searchMoviesAdvanced)
+
+// Get movie/series details
 router.get('/:imdbId', getMovieById)
+
+// Get movie/series with full plot
+router.get('/:imdbId/full', getMovieWithFullPlot)
 
 export default router 
