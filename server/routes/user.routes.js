@@ -7,11 +7,7 @@ import {
   getAllUsers,
   getUserById,
   updateUserById,
-  deleteUserById,
-  getWatchlist,
-  addToWatchlist,
-  removeFromWatchlist,
-  updateWatchlist
+  deleteUserById
 } from '../controllers/user.controller.js'
 
 const router = express.Router()
@@ -20,12 +16,6 @@ const router = express.Router()
 router.get('/me', authMiddleware, getMe)
 router.put('/me', authMiddleware, updateMe)
 router.delete('/me', authMiddleware, deleteMe)
-
-// Watchlist endpoints
-router.get('/me/watchlist', authMiddleware, getWatchlist)
-router.post('/me/watchlist', authMiddleware, addToWatchlist)
-router.delete('/me/watchlist/:movieId', authMiddleware, removeFromWatchlist)
-router.put('/me/watchlist', authMiddleware, updateWatchlist)
 
 // Admin endpoints (add admin middleware later)
 router.get('/', authMiddleware, getAllUsers)
