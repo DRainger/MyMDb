@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth, useApi } from '../hooks'
 import { recommendationAPI, watchlistAPI, ratingAPI } from '../services/api'
@@ -16,7 +16,10 @@ const Dashboard = () => {
     execute: fetchRecommendations
   } = useApi(recommendationAPI.getUserRecommendations, {
     cacheTime: 15 * 60 * 1000, // 15 minutes cache
-    retryCount: 1
+    retryCount: 1,
+    onError: (error) => {
+      console.error('Recommendations API error:', error)
+    }
   })
 
   // Fetch watchlist count
@@ -27,7 +30,10 @@ const Dashboard = () => {
     execute: fetchWatchlistCount
   } = useApi(watchlistAPI.getWatchlistCount, {
     cacheTime: 5 * 60 * 1000, // 5 minutes cache
-    retryCount: 1
+    retryCount: 1,
+    onError: (error) => {
+      console.error('Watchlist count API error:', error)
+    }
   })
 
   // Fetch user rating stats
@@ -38,7 +44,10 @@ const Dashboard = () => {
     execute: fetchRatingStats
   } = useApi(ratingAPI.getUserRatingStats, {
     cacheTime: 5 * 60 * 1000, // 5 minutes cache
-    retryCount: 1
+    retryCount: 1,
+    onError: (error) => {
+      console.error('Rating stats API error:', error)
+    }
   })
 
   // Fetch recent ratings
@@ -49,8 +58,41 @@ const Dashboard = () => {
     execute: fetchRecentRatings
   } = useApi(ratingAPI.getRecentRatings, {
     cacheTime: 5 * 60 * 1000, // 5 minutes cache
-    retryCount: 1
+    retryCount: 1,
+    onError: (error) => {
+      console.error('Recent ratings API error:', error)
+    }
   })
+
+  // Load data when component mounts
+  useEffect(() => {
+    if (user) {
+      console.log('Loading dashboard data for user:', user.id)
+      
+      // Execute API calls with debugging
+      const loadData = async () => {
+        try {
+          console.log('Fetching watchlist count...')
+          await fetchWatchlistCount()
+          
+          console.log('Fetching rating stats...')
+          await fetchRatingStats()
+          
+          console.log('Fetching recent ratings...')
+          await fetchRecentRatings({ limit: 3 })
+          
+          console.log('Fetching recommendations...')
+          await fetchRecommendations({ limit: 8 })
+        } catch (error) {
+          console.error('Error loading dashboard data:', error)
+        }
+      }
+      
+      loadData()
+    } else {
+      console.log('No user found, skipping dashboard data load')
+    }
+  }, [user, fetchWatchlistCount, fetchRatingStats, fetchRecentRatings, fetchRecommendations])
 
   const handleLogout = () => {
     setLoading(true)
@@ -78,11 +120,6 @@ const Dashboard = () => {
     return (ratingStatsData.averageRating || 0).toFixed(1)
   }
 
-  const getTotalWatched = () => {
-    // This would be implemented when we add a "watched" feature
-    // For now, we'll show the watchlist count as a proxy
-    return watchlistCountData?.count || 0
-  }
 
   const getWatchlistCount = () => {
     return watchlistCountData?.count || 0
@@ -149,12 +186,6 @@ const Dashboard = () => {
                 <span className="text-accent font-bold">{getAverageRating()}</span>
               )}
             </div>
-            {ratingStatsData?.favoriteGenre && (
-              <div className="flex justify-between items-center">
-                <span className="text-text/70">ז'אנר מועדף</span>
-                <span className="text-accent font-bold text-sm">{ratingStatsData.favoriteGenre}</span>
-              </div>
-            )}
           </div>
         </div>
         
@@ -174,6 +205,12 @@ const Dashboard = () => {
             ) : recentRatingsError ? (
               <div className="text-text/70 text-sm">
                 לא ניתן לטעון פעילות אחרונה
+                <button 
+                  onClick={() => fetchRecentRatings({ limit: 3 })}
+                  className="block mt-2 text-accent hover:text-accentDark text-xs"
+                >
+                  נסה שוב
+                </button>
               </div>
             ) : recentRatingsData?.ratings?.length > 0 ? (
               recentRatingsData.ratings.slice(0, 3).map((rating, index) => (
@@ -197,6 +234,15 @@ const Dashboard = () => {
             ) : (
               <div className="text-text/70 text-sm">
                 אין פעילות אחרונה
+                <p className="text-xs mt-1">
+                  דרג סרטים כדי לראות פעילות כאן
+                </p>
+                <Link 
+                  to="/search" 
+                  className="block mt-2 text-accent hover:text-accentDark text-xs font-medium"
+                >
+                  חפש סרטים לדירוג →
+                </Link>
               </div>
             )}
           </div>
@@ -290,6 +336,32 @@ const Dashboard = () => {
             message="חלק מהנתונים לא נטענו כראוי. רענן את הדף או נסה שוב מאוחר יותר." 
             variant="warning"
           />
+          <div className="mt-4 space-y-2">
+            {watchlistCountError && (
+              <button 
+                onClick={() => fetchWatchlistCount()}
+                className="btn-secondary text-sm"
+              >
+                נסה לטעון סטטיסטיקות רשימת צפייה
+              </button>
+            )}
+            {ratingStatsError && (
+              <button 
+                onClick={() => fetchRatingStats()}
+                className="btn-secondary text-sm"
+              >
+                נסה לטעון סטטיסטיקות דירוגים
+              </button>
+            )}
+            {recentRatingsError && (
+              <button 
+                onClick={() => fetchRecentRatings({ limit: 3 })}
+                className="btn-secondary text-sm"
+              >
+                נסה לטעון פעילות אחרונה
+              </button>
+            )}
+          </div>
         </div>
       )}
     </PageLayout>

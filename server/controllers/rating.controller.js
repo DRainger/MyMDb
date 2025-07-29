@@ -77,9 +77,19 @@ export const getRecentRatings = async (req, res, next) => {
   try {
     const { limit = 10 } = req.query
     
-    const ratings = await RatingService.getRecentRatings(req.user.id, parseInt(limit))
-    res.json({ ratings })
+    const result = await RatingService.getRecentRatingsSimple(req.user.id, parseInt(limit))
+    res.json(result)
   } catch (err) {
     res.status(404).json({ message: err.message })
+  }
+} 
+
+// Fix ratings without ratedAt field
+export const fixRatingsWithoutRatedAt = async (req, res, next) => {
+  try {
+    const result = await RatingService.fixRatingsWithoutRatedAt(req.user.id)
+    res.json(result)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
   }
 } 

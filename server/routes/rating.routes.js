@@ -7,7 +7,8 @@ import {
   removeRating,
   getAverageRating,
   getUserRatingStats,
-  getRecentRatings
+  getRecentRatings,
+  fixRatingsWithoutRatedAt
 } from '../controllers/rating.controller.js'
 
 const router = express.Router()
@@ -29,6 +30,9 @@ router.get('/stats', getUserRatingStats)
 
 // Get recent ratings for a user
 router.get('/recent', getRecentRatings)
+
+// Fix ratings without ratedAt field
+router.post('/fix-ratings', fixRatingsWithoutRatedAt)
 
 // Remove user's rating for a movie
 router.delete('/:movieId', removeRating)

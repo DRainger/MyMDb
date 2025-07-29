@@ -4,6 +4,7 @@ import {
   updateUserById,
   getAllUsers
 } from '../dal/index.js'
+import { MovieService } from './movie.service.js'
 
 const logger = createLogger('RATING-SERVICE')
 
@@ -179,7 +180,8 @@ export class RatingService {
           averageRating: 0,
           ratingDistribution: {
             1: 0, 2: 0, 3: 0, 4: 0, 5: 0
-          }
+          },
+          favoriteGenre: null
         }
       }
       
@@ -191,10 +193,15 @@ export class RatingService {
         ratingDistribution[r.rating]++
       })
       
+      // Calculate favorite genre (this would need movie data to be fully accurate)
+      // For now, we'll return a placeholder or null
+      const favoriteGenre = null // This would be calculated based on rated movies' genres
+      
       return {
         totalRatings,
         averageRating: Math.round(averageRating * 10) / 10,
-        ratingDistribution
+        ratingDistribution,
+        favoriteGenre
       }
     } catch (error) {
       logger.error(`Error getting user rating stats: ${error.message}`)
@@ -202,10 +209,10 @@ export class RatingService {
     }
   }
 
-  // Get recent ratings for a user
-  static async getRecentRatings(userId, limit = 10) {
+  // Get recent ratings for a user (simplified version without OMDB API calls)
+  static async getRecentRatingsSimple(userId, limit = 10) {
     try {
-      logger.info(`Getting recent ratings for user ${userId}`)
+      logger.info(`Getting recent ratings for user ${userId} (simple version)`)
       
       const user = await findUserById(userId)
       if (!user) {
@@ -213,13 +220,78 @@ export class RatingService {
       }
 
       const ratings = user.ratings || []
+      logger.info(`Found ${ratings.length} ratings for user ${userId}`)
       
-      // Sort by ratedAt descending and limit
-      return ratings
+      if (ratings.length === 0) {
+        logger.info(`No ratings found for user ${userId}`)
+        return {
+          ratings: [],
+          total: 0
+        }
+      }
+      
+      // Log the first few ratings to see their structure
+      logger.info(`Sample ratings:`, ratings.slice(0, 3))
+      
+      // Sort by ratedAt descending and limit, handle missing ratedAt
+      const recentRatings = ratings
+        .map(rating => ({
+          ...rating,
+          ratedAt: rating.ratedAt || new Date() // Fallback for ratings without ratedAt
+        }))
         .sort((a, b) => new Date(b.ratedAt) - new Date(a.ratedAt))
         .slice(0, limit)
+
+      logger.info(`Processing ${recentRatings.length} recent ratings`)
+      
+      // Return basic rating data without movie details
+      const basicRatings = recentRatings.map(rating => ({
+        ...rating,
+        movieTitle: `סרט ${rating.movieId}`,
+        movieYear: null,
+        moviePoster: null
+      }))
+      
+      logger.info(`Returning ${basicRatings.length} basic ratings`)
+      return {
+        ratings: basicRatings,
+        total: ratings.length
+      }
     } catch (error) {
       logger.error(`Error getting recent ratings: ${error.message}`)
+      throw error
+    }
+  }
+
+  // Fix existing ratings that don't have ratedAt field
+  static async fixRatingsWithoutRatedAt(userId) {
+    try {
+      logger.info(`Fixing ratings without ratedAt for user ${userId}`)
+      
+      const user = await findUserById(userId)
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      let updated = false
+      const ratings = user.ratings || []
+      
+      for (let i = 0; i < ratings.length; i++) {
+        if (!ratings[i].ratedAt) {
+          ratings[i].ratedAt = new Date()
+          updated = true
+          logger.info(`Added ratedAt to rating ${i} for movie ${ratings[i].movieId}`)
+        }
+      }
+      
+      if (updated) {
+        await user.save()
+        logger.info(`Updated ${ratings.length} ratings for user ${userId}`)
+      }
+      
+      return { updated, count: ratings.length }
+    } catch (error) {
+      logger.error(`Error fixing ratings: ${error.message}`)
       throw error
     }
   }
