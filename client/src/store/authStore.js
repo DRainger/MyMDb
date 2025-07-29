@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { authAPI } from '../services/api.js'
 
 const useAuthStore = create(
   persist(
@@ -14,19 +15,7 @@ const useAuthStore = create(
       login: async (credentials) => {
         set({ loading: true, error: null })
         try {
-          const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(credentials),
-          })
-
-          const data = await response.json()
-
-          if (!response.ok) {
-            throw new Error(data.message || 'Login failed')
-          }
+          const data = await authAPI.login(credentials)
 
           set({
             user: data.user,
@@ -48,19 +37,7 @@ const useAuthStore = create(
       register: async (userData) => {
         set({ loading: true, error: null })
         try {
-          const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-          })
-
-          const data = await response.json()
-
-          if (!response.ok) {
-            throw new Error(data.message || 'Registration failed')
-          }
+          const data = await authAPI.register(userData)
 
           set({
             user: data.user,
@@ -98,6 +75,24 @@ const useAuthStore = create(
 
       setToken: (token) => {
         set({ token })
+      },
+
+      // Check if user is authenticated
+      isAuthenticated: () => {
+        const { user, token } = get()
+        return !!(user && token)
+      },
+
+      // Get user role
+      getUserRole: () => {
+        const { user } = get()
+        return user?.role || 'user'
+      },
+
+      // Check if user is admin
+      isAdmin: () => {
+        const { user } = get()
+        return user?.role === 'admin'
       },
     }),
     {

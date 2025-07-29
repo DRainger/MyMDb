@@ -14,9 +14,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthLoader>
-        <div className="min-h-screen bg-gray-50">
-          <RouterProvider router={router} />
-        </div>
+        <RouterProvider router={router} />
       </AuthLoader>
     </ErrorBoundary>
   )
