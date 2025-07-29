@@ -1,17 +1,15 @@
 import React, { useState } from 'react'
-import useAuthStore from '../store/authStore'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../hooks'
 import { CardLoading, SkeletonLoading } from '../components/Loading'
 
 const Dashboard = () => {
-  const { user, logout } = useAuthStore()
-  const navigate = useNavigate()
+  const { user, logout } = useAuth()
   const [loading, setLoading] = useState(false)
 
   const handleLogout = () => {
     setLoading(true)
     logout()
-    navigate('/login')
   }
 
   return (
@@ -89,9 +87,9 @@ const Dashboard = () => {
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-4 text-accent">פעולות מהירות</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="btn-primary">
+            <Link to="/search" className="btn-primary text-center">
               חיפוש סרטים
-            </button>
+            </Link>
             <button className="btn-secondary">
               רשימת צפייה
             </button>

@@ -1,96 +1,49 @@
-import React, { useState, useEffect } from 'react'
-import useAuthStore from '../store/authStore'
-import { useNavigate, Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { useForm, useAuth } from '../hooks'
 import { ButtonLoading } from '../components/Loading'
 
 const Login = () => {
-  const [formData, setFormData] = useState({
+  const { login, loading, error, clearError } = useAuth()
+
+  // Form validation rules
+  const validationRules = {
+    email: [
+      (value) => !value ? 'אימייל הוא שדה חובה' : '',
+      (value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'אנא הכנס כתובת אימייל תקינה' : ''
+    ],
+    password: [
+      (value) => !value ? 'סיסמה היא שדה חובה' : '',
+      (value) => value.length < 6 ? 'סיסמה חייבת להכיל לפחות 6 תווים' : ''
+    ]
+  }
+
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    getFieldError
+  } = useForm({
     email: '',
     password: ''
-  })
-  const [errors, setErrors] = useState({})
-  const [touched, setTouched] = useState({})
-  const { login, loading, error, clearError } = useAuthStore()
-  const navigate = useNavigate()
+  }, validationRules)
 
   // Clear error when component mounts
   useEffect(() => {
     clearError()
   }, [clearError])
 
-  const validateField = (name, value) => {
-    switch (name) {
-      case 'email':
-        if (!value) return 'אימייל הוא שדה חובה'
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return 'אנא הכנס כתובת אימייל תקינה'
-        }
-        return ''
-      case 'password':
-        if (!value) return 'סיסמה היא שדה חובה'
-        if (value.length < 6) return 'סיסמה חייבת להכיל לפחות 6 תווים'
-        return ''
-      default:
-        return ''
-    }
+  const onSubmit = async (formData) => {
+    return await login(formData)
   }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
-  }
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target
-    setTouched(prev => ({
-      ...prev,
-      [name]: true
-    }))
-
-    const error = validateField(name, value)
-    setErrors(prev => ({
-      ...prev,
-      [name]: error
-    }))
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key])
-      if (error) newErrors[key] = error
-    })
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-    
-    const result = await login(formData)
-    
-    if (result.success) {
-      navigate('/dashboard')
-    }
-  }
-
-  const getFieldError = (fieldName) => {
-    return touched[fieldName] && errors[fieldName]
+    await handleSubmit(onSubmit)
   }
 
   return (
@@ -119,7 +72,7 @@ const Login = () => {
                 </div>
               )}
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="form-field">
                   <label htmlFor="email" className="form-field label">
                     כתובת אימייל
@@ -129,7 +82,7 @@ const Login = () => {
                     name="email"
                     type="email"
                     autoComplete="email"
-                    value={formData.email}
+                    value={values.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={`input-field ${getFieldError('email') ? 'error' : ''}`}
@@ -150,7 +103,7 @@ const Login = () => {
                     name="password"
                     type="password"
                     autoComplete="current-password"
-                    value={formData.password}
+                    value={values.password}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={`input-field ${getFieldError('password') ? 'error' : ''}`}
@@ -165,10 +118,10 @@ const Login = () => {
                 <div>
                   <button 
                     type="submit"
-                    disabled={loading}
+                    disabled={isSubmitting || loading}
                     className="btn-primary w-full"
                   >
-                    {loading ? (
+                    {isSubmitting || loading ? (
                       <ButtonLoading text="מתחבר..." />
                     ) : (
                       'התחבר'

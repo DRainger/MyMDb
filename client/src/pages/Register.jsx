@@ -1,20 +1,51 @@
-import React, { useState, useEffect } from 'react'
-import useAuthStore from '../store/authStore'
-import { useNavigate, Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { useForm, useAuth } from '../hooks'
 import { ButtonLoading } from '../components/Loading'
 
 const Register = () => {
-  const [formData, setFormData] = useState({
+  const { register, loading, error, clearError } = useAuth()
+
+  // Form validation rules
+  const validationRules = {
+    name: [
+      (value) => !value ? 'שם הוא שדה חובה' : '',
+      (value) => value.length < 2 ? 'שם חייב להכיל לפחות 2 תווים' : '',
+      (value) => !/^[א-ת\s]+$/.test(value) ? 'שם חייב להכיל רק אותיות בעברית' : ''
+    ],
+    email: [
+      (value) => !value ? 'אימייל הוא שדה חובה' : '',
+      (value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'אנא הכנס כתובת אימייל תקינה' : ''
+    ],
+    password: [
+      (value) => !value ? 'סיסמה היא שדה חובה' : '',
+      (value) => value.length < 8 ? 'סיסמה חייבת להכיל לפחות 8 תווים' : '',
+      (value, allValues) => {
+        const strength = calculatePasswordStrength(value)
+        return strength < 3 ? 'סיסמה חייבת להיות חזקה יותר' : ''
+      }
+    ],
+    confirmPassword: [
+      (value) => !value ? 'אימות סיסמה הוא שדה חובה' : '',
+      (value, allValues) => value !== allValues.password ? 'הסיסמאות לא תואמות' : ''
+    ]
+  }
+
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    getFieldError
+  } = useForm({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
-  })
-  const [errors, setErrors] = useState({})
-  const [touched, setTouched] = useState({})
-  const [passwordStrength, setPasswordStrength] = useState(0)
-  const { register, loading, error, clearError } = useAuthStore()
-  const navigate = useNavigate()
+  }, validationRules)
 
   // Clear error when component mounts
   useEffect(() => {
@@ -22,11 +53,6 @@ const Register = () => {
   }, [clearError])
 
   // Calculate password strength
-  useEffect(() => {
-    const strength = calculatePasswordStrength(formData.password)
-    setPasswordStrength(strength)
-  }, [formData.password])
-
   const calculatePasswordStrength = (password) => {
     if (!password) return 0
     
@@ -58,95 +84,20 @@ const Register = () => {
     }
   }
 
-  const validateField = (name, value) => {
-    switch (name) {
-      case 'name':
-        if (!value) return 'שם הוא שדה חובה'
-        if (value.length < 2) return 'שם חייב להכיל לפחות 2 תווים'
-        if (!/^[א-ת\s]+$/.test(value)) return 'שם חייב להכיל רק אותיות בעברית'
-        return ''
-      case 'email':
-        if (!value) return 'אימייל הוא שדה חובה'
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return 'אנא הכנס כתובת אימייל תקינה'
-        }
-        return ''
-      case 'password':
-        if (!value) return 'סיסמה היא שדה חובה'
-        if (value.length < 8) return 'סיסמה חייבת להכיל לפחות 8 תווים'
-        if (passwordStrength < 3) return 'סיסמה חייבת להיות חזקה יותר'
-        return ''
-      case 'confirmPassword':
-        if (!value) return 'אימות סיסמה הוא שדה חובה'
-        if (value !== formData.password) return 'הסיסמאות לא תואמות'
-        return ''
-      default:
-        return ''
-    }
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
-  }
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target
-    setTouched(prev => ({
-      ...prev,
-      [name]: true
-    }))
-
-    const error = validateField(name, value)
-    setErrors(prev => ({
-      ...prev,
-      [name]: error
-    }))
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key])
-      if (error) newErrors[key] = error
-    })
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-    
-    const result = await register({
+  const onSubmit = async (formData) => {
+    return await register({
       name: formData.name,
       email: formData.email,
       password: formData.password
     })
-    
-    if (result.success) {
-      navigate('/dashboard')
-    }
   }
 
-  const getFieldError = (fieldName) => {
-    return touched[fieldName] && errors[fieldName]
+  const handleFormSubmit = async (e) => {
+    e.preventDefault()
+    await handleSubmit(onSubmit)
   }
 
+  const passwordStrength = calculatePasswordStrength(values.password)
   const strengthInfo = getPasswordStrengthText(passwordStrength)
 
   return (
@@ -175,7 +126,7 @@ const Register = () => {
                 </div>
               )}
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="form-field">
                   <label htmlFor="name" className="form-field label">
                     שם מלא
@@ -185,7 +136,7 @@ const Register = () => {
                     name="name"
                     type="text"
                     autoComplete="name"
-                    value={formData.name}
+                    value={values.name}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={`input-field ${getFieldError('name') ? 'error' : ''}`}
@@ -206,7 +157,7 @@ const Register = () => {
                     name="email"
                     type="email"
                     autoComplete="email"
-                    value={formData.email}
+                    value={values.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={`input-field ${getFieldError('email') ? 'error' : ''}`}
@@ -227,14 +178,14 @@ const Register = () => {
                     name="password"
                     type="password"
                     autoComplete="new-password"
-                    value={formData.password}
+                    value={values.password}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={`input-field ${getFieldError('password') ? 'error' : ''}`}
                     placeholder="הכנס סיסמה"
                     required
                   />
-                  {formData.password && (
+                  {values.password && (
                     <div className="mt-3 p-3 bg-primary/50 rounded-lg border border-accent/20">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex space-x-1">
@@ -272,7 +223,7 @@ const Register = () => {
                     name="confirmPassword"
                     type="password"
                     autoComplete="new-password"
-                    value={formData.confirmPassword}
+                    value={values.confirmPassword}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={`input-field ${getFieldError('confirmPassword') ? 'error' : ''}`}
@@ -287,10 +238,10 @@ const Register = () => {
                 <div>
                   <button 
                     type="submit"
-                    disabled={loading}
+                    disabled={isSubmitting || loading}
                     className="btn-primary w-full"
                   >
-                    {loading ? (
+                    {isSubmitting || loading ? (
                       <ButtonLoading text="נרשם..." />
                     ) : (
                       'הירשם'

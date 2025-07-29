@@ -4,8 +4,9 @@ import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import Dashboard from '../pages/Dashboard'
+import MovieSearch from '../pages/MovieSearch'
 import NotFound from '../pages/NotFound'
-import { ProtectedRoute, PublicRoute } from '../components/RouteGuards'
+import { ProtectedRoute, PublicRoute } from './RouteGuards'
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
             <Dashboard />
           </ProtectedRoute>
         )
+      },
+      {
+        path: 'search',
+        element: <MovieSearch />
       },
       {
         path: '*',

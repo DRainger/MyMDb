@@ -1,6 +1,6 @@
 import React from 'react'
 import { RouterProvider } from 'react-router-dom'
-import { AuthLoader } from './components/RouteGuards'
+import { AuthLoader } from './routes/RouteGuards'
 import ErrorBoundary from './components/ErrorBoundary'
 import router from './routes/AppRoutes'
 import './styles/index.css'

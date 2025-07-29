@@ -1,14 +1,12 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import useAuthStore from '../store/authStore'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../hooks'
 
 const NavBar = () => {
-  const { user, logout } = useAuthStore()
-  const navigate = useNavigate()
+  const { user, logout } = useAuth()
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
   }
 
   return (
@@ -24,6 +22,10 @@ const NavBar = () => {
           <div className="flex items-center space-x-4">
             <Link to="/" className="text-text hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
               בית
+            </Link>
+            
+            <Link to="/search" className="text-text hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              חיפוש סרטים
             </Link>
             
             {user ? (
