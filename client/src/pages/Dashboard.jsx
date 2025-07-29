@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../hooks'
-import { useApi } from '../hooks'
-import { recommendationAPI } from '../services/api'
-import { LoadingGrid, PageLayout, MovieGrid } from '../components'
+import { useAuth, useApi } from '../hooks'
+import { recommendationAPI, watchlistAPI, ratingAPI } from '../services/api'
+import { LoadingGrid, PageLayout, MovieGrid, Loading, ErrorMessage } from '../components'
 
 const Dashboard = () => {
   const { user, logout } = useAuth()
@@ -20,14 +19,73 @@ const Dashboard = () => {
     retryCount: 1
   })
 
+  // Fetch watchlist count
+  const {
+    data: watchlistCountData,
+    loading: watchlistCountLoading,
+    error: watchlistCountError,
+    execute: fetchWatchlistCount
+  } = useApi(watchlistAPI.getWatchlistCount, {
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    retryCount: 1
+  })
+
+  // Fetch user rating stats
+  const {
+    data: ratingStatsData,
+    loading: ratingStatsLoading,
+    error: ratingStatsError,
+    execute: fetchRatingStats
+  } = useApi(ratingAPI.getUserRatingStats, {
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    retryCount: 1
+  })
+
+  // Fetch recent ratings
+  const {
+    data: recentRatingsData,
+    loading: recentRatingsLoading,
+    error: recentRatingsError,
+    execute: fetchRecentRatings
+  } = useApi(ratingAPI.getRecentRatings, {
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    retryCount: 1
+  })
+
   const handleLogout = () => {
     setLoading(true)
     logout()
   }
 
   const handleMovieClick = (imdbId) => {
-    // Navigate to movie search with the selected movie
-    window.open(`/search?movie=${imdbId}`, '_blank')
+    // Navigate to movie details page in the same tab
+    window.location.href = `/movie/${imdbId}`
+  }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('he-IL', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const getAverageRating = () => {
+    if (!ratingStatsData || !ratingStatsData.totalRatings) return '-'
+    return (ratingStatsData.averageRating || 0).toFixed(1)
+  }
+
+  const getTotalWatched = () => {
+    // This would be implemented when we add a "watched" feature
+    // For now, we'll show the watchlist count as a proxy
+    return watchlistCountData?.count || 0
+  }
+
+  const getWatchlistCount = () => {
+    return watchlistCountData?.count || 0
   }
 
   return (
@@ -57,33 +115,94 @@ const Dashboard = () => {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Statistics Card */}
         <div className="card">
           <h3 className="text-lg font-semibold mb-4 text-accent">סטטיסטיקות</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-text/70">סרטים שצפית</span>
-              <span className="text-accent font-bold">0</span>
+              <span className="text-text/70">סרטים ברשימת צפייה</span>
+              {watchlistCountLoading ? (
+                <Loading size="small" />
+              ) : watchlistCountError ? (
+                <span className="text-red-400 text-sm">שגיאה</span>
+              ) : (
+                <span className="text-accent font-bold">{getWatchlistCount()}</span>
+              )}
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-text/70">רשימת צפייה</span>
-              <span className="text-accent font-bold">0</span>
+              <span className="text-text/70">סרטים שדירגת</span>
+              {ratingStatsLoading ? (
+                <Loading size="small" />
+              ) : ratingStatsError ? (
+                <span className="text-red-400 text-sm">שגיאה</span>
+              ) : (
+                <span className="text-accent font-bold">{ratingStatsData?.totalRatings || 0}</span>
+              )}
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-text/70">דירוג ממוצע</span>
-              <span className="text-accent font-bold">-</span>
+              <span className="text-text/70">דירוג ממוצע שלך</span>
+              {ratingStatsLoading ? (
+                <Loading size="small" />
+              ) : ratingStatsError ? (
+                <span className="text-red-400 text-sm">שגיאה</span>
+              ) : (
+                <span className="text-accent font-bold">{getAverageRating()}</span>
+              )}
             </div>
+            {ratingStatsData?.favoriteGenre && (
+              <div className="flex justify-between items-center">
+                <span className="text-text/70">ז'אנר מועדף</span>
+                <span className="text-accent font-bold text-sm">{ratingStatsData.favoriteGenre}</span>
+              </div>
+            )}
           </div>
         </div>
         
+        {/* Recent Activity Card */}
         <div className="card">
           <h3 className="text-lg font-semibold mb-4 text-accent">פעילות אחרונה</h3>
           <div className="space-y-3">
-            <div className="text-text/70 text-sm">
-              אין פעילות אחרונה
-            </div>
+            {recentRatingsLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-text/20 rounded h-4 w-3/4"></div>
+                    <div className="bg-text/10 rounded h-3 w-1/2 mt-1"></div>
+                  </div>
+                ))}
+              </div>
+            ) : recentRatingsError ? (
+              <div className="text-text/70 text-sm">
+                לא ניתן לטעון פעילות אחרונה
+              </div>
+            ) : recentRatingsData?.ratings?.length > 0 ? (
+              recentRatingsData.ratings.slice(0, 3).map((rating, index) => (
+                <div key={index} className="border-b border-accent/10 pb-2 last:border-b-0">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-text font-medium text-sm truncate">
+                        {rating.movieTitle || 'סרט לא ידוע'}
+                      </p>
+                      <p className="text-text/70 text-xs">
+                        {formatDate(rating.ratedAt)}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-accent font-bold text-sm">{rating.rating}</span>
+                      <span className="text-accent">⭐</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-text/70 text-sm">
+                אין פעילות אחרונה
+              </div>
+            )}
           </div>
         </div>
         
+        {/* Settings Card */}
         <div className="card">
           <h3 className="text-lg font-semibold mb-4 text-accent">הגדרות</h3>
           <div className="space-y-3">
@@ -95,6 +214,9 @@ const Dashboard = () => {
             </button>
             <button className="w-full text-right text-text hover:text-accent transition-colors">
               העדפות
+            </button>
+            <button className="w-full text-right text-text hover:text-accent transition-colors">
+              היסטוריית צפייה
             </button>
           </div>
         </div>
@@ -113,9 +235,7 @@ const Dashboard = () => {
           <LoadingGrid count={4} columns="grid-cols-1 md:grid-cols-2 lg:grid-cols-4" />
         ) : recommendationsError ? (
           <div className="card">
-            <p className="text-text/70 text-center">
-              לא ניתן לטעון המלצות כרגע
-            </p>
+            <ErrorMessage message="לא ניתן לטעון המלצות כרגע" />
             <button 
               onClick={() => fetchRecommendations({ limit: 8 })}
               className="btn-secondary mt-4 mx-auto block"
@@ -157,11 +277,21 @@ const Dashboard = () => {
           <Link to="/recommendations" className="btn-secondary text-center">
             המלצות
           </Link>
-          <button className="btn-secondary">
-            היסטוריית צפייה
-          </button>
+          <Link to="/movies" className="btn-secondary text-center">
+            גלה סרטים חדשים
+          </Link>
         </div>
       </div>
+
+      {/* Error Handling for API Failures */}
+      {(watchlistCountError || ratingStatsError || recentRatingsError) && (
+        <div className="mt-6">
+          <ErrorMessage 
+            message="חלק מהנתונים לא נטענו כראוי. רענן את הדף או נסה שוב מאוחר יותר." 
+            variant="warning"
+          />
+        </div>
+      )}
     </PageLayout>
   )
 }

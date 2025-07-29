@@ -49,6 +49,17 @@ const NavBar = () => {
             </Link>
             
             <Link 
+              to="/movies" 
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                isActive('/movies') 
+                  ? 'bg-accent text-primary shadow-md' 
+                  : 'text-text hover:text-accent hover:bg-accent/10'
+              }`}
+            >
+              גלה סרטים חדשים
+            </Link>
+            
+            <Link 
               to="/recommendations" 
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 isActive('/recommendations') 

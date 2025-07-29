@@ -14,4 +14,5 @@ export { default as LoadingGrid } from './LoadingGrid'
 export { default as RatingStars } from './RatingStars'
 
 // Loading Components
+export { default as Loading } from './Loading'
 export * from './Loading' 

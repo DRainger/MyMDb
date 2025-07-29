@@ -72,8 +72,6 @@ const MovieCard = ({
       // Reload average rating
       const avgRatingData = await ratingAPI.getAverageRating(movie.imdbID)
       setAverageRating(avgRatingData)
-      
-      alert(rating === userRating ? 'הדירוג עודכן בהצלחה!' : 'הדירוג נוסף בהצלחה!')
     } catch (error) {
       console.error('Failed to rate movie:', error)
       alert('שגיאה בדירוג הסרט')
@@ -142,7 +140,7 @@ const MovieCard = ({
           <img 
             src={getMoviePoster()} 
             alt={getMovieTitle()}
-            className="w-16 h-24 object-cover rounded-lg"
+            className="w-16 h-24 object-cover rounded-lg flex-shrink-0"
             onError={(e) => {
               e.target.src = '/placeholder-movie.svg'
             }}
@@ -155,8 +153,8 @@ const MovieCard = ({
               {getMovieYear()} • {getMovieType()}
             </p>
             
-            {/* User Rating Section */}
-            <div className="mb-3">
+            {/* Compact User Rating Section */}
+            <div className="mb-2">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-text/70">הדירוג שלך:</span>
                 {ratingLoading && (
@@ -168,65 +166,65 @@ const MovieCard = ({
                 onRate={handleRateMovie}
                 interactive={!!authUser}
                 size="small"
-                className="mb-2"
+                className="mb-1"
               />
-              
-              {/* Average Rating */}
-              {averageRating.count > 0 && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-text/70">ממוצע:</span>
-                  <RatingStars
-                    rating={averageRating.average}
-                    size="small"
-                    showValue={true}
-                  />
-                  <span className="text-xs text-text/50">
-                    ({averageRating.count} דירוגים)
-                  </span>
-                </div>
-              )}
             </div>
+            
+            {/* Compact Average Rating */}
+            {averageRating.count > 0 && (
+              <div className="flex items-center space-x-1 mb-2">
+                <span className="text-xs text-text/70">ממוצע:</span>
+                <RatingStars
+                  rating={averageRating.average}
+                  size="small"
+                  showValue={false}
+                />
+                <span className="text-xs text-text/50">
+                  ({averageRating.count})
+                </span>
+              </div>
+            )}
 
-            {/* Enhanced Rating Display */}
+            {/* Compact Enhanced Rating Display */}
             {getMovieRating() && (
               <div className="flex items-center space-x-2 mb-2">
                 <div className="flex items-center space-x-1">
-                  <span className="text-accent">⭐</span>
-                  <span className="text-accent font-bold">{getMovieRating()}/10</span>
+                  <span className="text-accent text-sm">⭐</span>
+                  <span className="text-accent font-bold text-sm">{getMovieRating()}/10</span>
                 </div>
                 {movie.imdbVotes && (
                   <span className="text-text/50 text-xs">
-                    ({movie.imdbVotes} votes)
+                    ({movie.imdbVotes})
                   </span>
                 )}
               </div>
             )}
 
-            {/* Additional Ratings */}
+            {/* Compact Additional Ratings */}
             {movie.Ratings && movie.Ratings.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
-                {movie.Ratings.slice(0, 2).map((rating, index) => (
-                  <span key={index} className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">
+                {movie.Ratings.slice(0, 1).map((rating, index) => (
+                  <span key={index} className="text-xs bg-accent/10 text-accent px-1 py-0.5 rounded">
                     {rating.Source}: {rating.Value}
                   </span>
                 ))}
               </div>
             )}
 
-            {/* Awards Preview */}
+            {/* Compact Awards Preview */}
             {movie.Awards && movie.Awards !== 'N/A' && (
               <div className="mb-2">
-                <span className="text-xs text-accent/80 bg-accent/5 px-2 py-1 rounded">
+                <span className="text-xs text-accent/80 bg-accent/5 px-1 py-0.5 rounded">
                   🏆 {movie.Awards.split(',')[0]}
                 </span>
               </div>
             )}
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-auto">
               {variant === 'watchlist' && (
                 <button
                   onClick={handleRemoveClick}
-                  className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
+                  className="text-red-400 hover:text-red-300 text-xs font-medium transition-colors"
                 >
                   הסר מרשימה
                 </button>
@@ -235,7 +233,7 @@ const MovieCard = ({
               {showWatchlistButton && user && (
                 <button
                   onClick={handleWatchlistClick}
-                  className={`text-sm font-medium transition-colors ${
+                  className={`text-xs font-medium transition-colors ${
                     isInWatchlist 
                       ? 'text-red-400 hover:text-red-300' 
                       : 'text-accent hover:text-accentDark'

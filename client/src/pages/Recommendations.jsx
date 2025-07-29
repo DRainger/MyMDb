@@ -76,22 +76,8 @@ const Recommendations = () => {
   }, [activeTab, user, fetchPersonalized, fetchNewUser, fetchTrending, fetchPopular])
 
   const handleMovieClick = async (imdbId) => {
-    if (!imdbId) return
-
-    setSelectedMovie(imdbId)
-    setDetailsLoading(true)
-
-    try {
-      const response = await fetch(`/api/movies/${imdbId}`)
-      if (response.ok) {
-        const movieData = await response.json()
-        setMovieDetails(movieData)
-      }
-    } catch (error) {
-      console.error('Failed to fetch movie details:', error)
-    } finally {
-      setDetailsLoading(false)
-    }
+    // Navigate to movie details page in the same tab
+    window.location.href = `/movie/${imdbId}`
   }
 
   const getCurrentData = () => {

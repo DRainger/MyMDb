@@ -143,7 +143,7 @@ const Home = () => {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-accent">סרטים מומלצים</h2>
                 <Link 
-                  to="/search" 
+                  to="/movies" 
                   className="text-accent hover:text-accentDark text-sm font-medium transition-colors"
                 >
                   צפה בכל הסרטים →
@@ -176,17 +176,17 @@ const Home = () => {
                   </Link>
                 )}
                 
-                <div className="card hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer text-center">
+                <Link to="/recommendations" className="card hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer text-center">
                   <div className="text-3xl mb-2">⭐</div>
-                  <h3 className="font-semibold text-accent">סרטים מומלצים</h3>
+                  <h3 className="font-semibold text-accent">המלצות אישיות</h3>
                   <p className="text-text/70 text-sm">גלה סרטים חדשים</p>
-                </div>
+                </Link>
                 
-                <div className="card hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer text-center">
-                  <div className="text-3xl mb-2">📺</div>
-                  <h3 className="font-semibold text-accent">טריילרים</h3>
-                  <p className="text-text/70 text-sm">צפה בטריילרים חדשים</p>
-                </div>
+                <Link to="/movies" className="card hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer text-center">
+                  <div className="text-3xl mb-2">🎬</div>
+                  <h3 className="font-semibold text-accent">גלה סרטים חדשים</h3>
+                  <p className="text-text/70 text-sm">גלה סרטים חדשים</p>
+                </Link>
               </div>
             </section>
           </div>
@@ -196,19 +196,6 @@ const Home = () => {
             <div className="bg-secondary rounded-xl p-4 sm:p-6 shadow-lg mb-6 border border-accent/20">
               <h3 className="text-lg sm:text-xl font-bold text-accent mb-4">בקרוב</h3>
               {renderUpNext()}
-            </div>
-            
-            <div className="bg-secondary rounded-xl p-4 sm:p-6 shadow-lg border border-accent/20">
-              <h4 className="text-base sm:text-lg font-semibold text-accent mb-2">טריילרים חדשים</h4>
-              <p className="text-text/70 text-xs sm:text-sm mb-4">
-                צפה בטריילרים החדשים ביותר
-              </p>
-              <Link 
-                to="/search" 
-                className="btn-primary w-full text-center"
-              >
-                צפה בטריילרים
-              </Link>
             </div>
           </aside>
         </div>
