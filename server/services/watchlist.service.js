@@ -1,4 +1,5 @@
 import { createLogger } from '../utils/logger.js'
+import { MovieService } from './movie.service.js'
 import {
   getUserWatchlist,
   addMovieToWatchlist,
@@ -18,7 +19,7 @@ const logger = createLogger('WATCHLIST-SERVICE')
  */
 
 export class WatchlistService {
-  // Get user's watchlist
+  // Get user's watchlist with full movie details
   static async getUserWatchlist(userId) {
     try {
       logger.info(`Getting watchlist for user: ${userId}`)
@@ -28,8 +29,31 @@ export class WatchlistService {
         logger.warn(`User not found when getting watchlist: ${userId}`)
         throw new Error('User not found')
       }
+
+      // Fetch full movie details for each movie in watchlist
+      const watchlistWithDetails = []
+      for (const item of watchlist) {
+        try {
+          const movieDetails = await MovieService.getMovieById(item.movieId)
+          watchlistWithDetails.push({
+            movieId: item.movieId,
+            addedAt: item.addedAt,
+            ...movieDetails // Include all movie details from OMDB
+          })
+        } catch (error) {
+          logger.warn(`Failed to fetch details for movie ${item.movieId}: ${error.message}`)
+          // Add movie with basic info if details fetch fails
+          watchlistWithDetails.push({
+            movieId: item.movieId,
+            addedAt: item.addedAt,
+            Title: `Movie ${item.movieId}`,
+            Year: 'N/A',
+            Poster: '/placeholder-movie.svg'
+          })
+        }
+      }
       
-      return watchlist
+      return { watchlist: watchlistWithDetails }
     } catch (error) {
       logger.error(`Error getting user watchlist: ${error.message}`)
       throw error
@@ -188,8 +212,34 @@ export class WatchlistService {
         logger.warn(`User not found when getting paginated watchlist: ${userId}`)
         throw new Error('User not found')
       }
+
+      // Fetch full movie details for paginated results
+      const watchlistWithDetails = []
+      for (const item of result.watchlist) {
+        try {
+          const movieDetails = await MovieService.getMovieById(item.movieId)
+          watchlistWithDetails.push({
+            movieId: item.movieId,
+            addedAt: item.addedAt,
+            ...movieDetails // Include all movie details from OMDB
+          })
+        } catch (error) {
+          logger.warn(`Failed to fetch details for movie ${item.movieId}: ${error.message}`)
+          // Add movie with basic info if details fetch fails
+          watchlistWithDetails.push({
+            movieId: item.movieId,
+            addedAt: item.addedAt,
+            Title: `Movie ${item.movieId}`,
+            Year: 'N/A',
+            Poster: '/placeholder-movie.svg'
+          })
+        }
+      }
       
-      return result
+      return {
+        watchlist: watchlistWithDetails,
+        pagination: result.pagination
+      }
     } catch (error) {
       logger.error(`Error getting paginated watchlist: ${error.message}`)
       throw error

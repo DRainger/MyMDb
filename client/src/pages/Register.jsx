@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm, useAuth } from '../hooks'
-import { ButtonLoading } from '../components/Loading'
+import { ButtonLoading, ErrorMessage, PageLayout } from '../components'
 
 const Register = () => {
   const { register, loading, error, clearError } = useAuth()
@@ -101,174 +101,153 @@ const Register = () => {
   const strengthInfo = getPasswordStrengthText(passwordStrength)
 
   return (
-    <div className="min-h-screen bg-primary text-text">
-      <div className="main-container py-6 md:py-10">
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <div className="w-full max-w-md">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-accent mb-4">
-                יצירת חשבון חדש
-              </h1>
-              <p className="text-text/80 text-base">
-                מלא את הפרטים להרשמה
-              </p>
-            </div>
+    <PageLayout>
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-accent mb-4">
+              יצירת חשבון חדש
+            </h1>
+            <p className="text-text/80 text-base">
+              צור חשבון חדש כדי להתחיל להשתמש באפליקציה
+            </p>
+          </div>
+          
+          <div className="form-container">
+            {error && (
+              <ErrorMessage message={error} className="mb-6" />
+            )}
             
-            <div className="form-container">
-              {error && (
-                <div className="error-message mb-6">
-                  <div className="flex items-center">
-                    <svg className="h-5 w-5 text-red-400 mr-3" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm">{error}</span>
-                  </div>
-                </div>
-              )}
-              
-              <form onSubmit={handleFormSubmit} className="space-y-6">
-                <div className="form-field">
-                  <label htmlFor="name" className="form-field label">
-                    שם מלא
-                  </label>
-                  <input 
-                    id="name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${getFieldError('name') ? 'error' : ''}`}
-                    placeholder="הכנס את השם המלא שלך"
-                    required
-                  />
-                  {getFieldError('name') && (
-                    <p className="form-field error-text">{errors.name}</p>
-                  )}
-                </div>
+            <form onSubmit={handleFormSubmit} className="space-y-6">
+              <div className="form-field">
+                <label htmlFor="name" className="form-field label">
+                  שם מלא
+                </label>
+                <input 
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  value={values.name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field ${getFieldError('name') ? 'error' : ''}`}
+                  placeholder="הכנס את שמך המלא"
+                />
+                {getFieldError('name') && (
+                  <div className="error-text">{getFieldError('name')}</div>
+                )}
+              </div>
 
-                <div className="form-field">
-                  <label htmlFor="email" className="form-field label">
-                    כתובת אימייל
-                  </label>
-                  <input 
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${getFieldError('email') ? 'error' : ''}`}
-                    placeholder="הכנס את האימייל שלך"
-                    required
-                  />
-                  {getFieldError('email') && (
-                    <p className="form-field error-text">{errors.email}</p>
-                  )}
-                </div>
+              <div className="form-field">
+                <label htmlFor="email" className="form-field label">
+                  כתובת אימייל
+                </label>
+                <input 
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={values.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field ${getFieldError('email') ? 'error' : ''}`}
+                  placeholder="הכנס כתובת אימייל"
+                />
+                {getFieldError('email') && (
+                  <div className="error-text">{getFieldError('email')}</div>
+                )}
+              </div>
 
-                <div className="form-field">
-                  <label htmlFor="password" className="form-field label">
-                    סיסמה
-                  </label>
-                  <input 
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={values.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${getFieldError('password') ? 'error' : ''}`}
-                    placeholder="הכנס סיסמה"
-                    required
-                  />
-                  {values.password && (
-                    <div className="mt-3 p-3 bg-primary/50 rounded-lg border border-accent/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex space-x-1">
-                          {[1, 2, 3, 4, 5].map((level) => (
-                            <div
-                              key={level}
-                              className={`h-2 w-8 rounded-full transition-colors ${
-                                level <= passwordStrength
-                                  ? strengthInfo.bg
-                                  : 'bg-text/20'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className={`text-xs font-medium ${strengthInfo.color}`}>
-                          {strengthInfo.text}
-                        </span>
+              <div className="form-field">
+                <label htmlFor="password" className="form-field label">
+                  סיסמה
+                </label>
+                <input 
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={values.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field ${getFieldError('password') ? 'error' : ''}`}
+                  placeholder="הכנס סיסמה חזקה"
+                />
+                {values.password && (
+                  <div className="mt-2">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-300 ${strengthInfo.bg}`}
+                          style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                        ></div>
                       </div>
-                      <p className="text-xs text-text/60">
-                        סיסמה חייבת להכיל לפחות 8 תווים, אות גדולה, אות קטנה, מספר ותו מיוחד
-                      </p>
+                      <span className={`text-xs font-medium ${strengthInfo.color}`}>
+                        {strengthInfo.text}
+                      </span>
                     </div>
-                  )}
-                  {getFieldError('password') && (
-                    <p className="form-field error-text">{errors.password}</p>
-                  )}
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="confirmPassword" className="form-field label">
-                    אימות סיסמה
-                  </label>
-                  <input 
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    value={values.confirmPassword}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${getFieldError('confirmPassword') ? 'error' : ''}`}
-                    placeholder="הכנס את הסיסמה שוב"
-                    required
-                  />
-                  {getFieldError('confirmPassword') && (
-                    <p className="form-field error-text">{errors.confirmPassword}</p>
-                  )}
-                </div>
-
-                <div>
-                  <button 
-                    type="submit"
-                    disabled={isSubmitting || loading}
-                    className="btn-primary w-full"
-                  >
-                    {isSubmitting || loading ? (
-                      <ButtonLoading text="נרשם..." />
-                    ) : (
-                      'הירשם'
-                    )}
-                  </button>
-                </div>
-              </form>
-
-              <div className="divider">
-                <div className="divider-text">
-                  <span>או</span>
-                </div>
+                  </div>
+                )}
+                {getFieldError('password') && (
+                  <div className="error-text">{getFieldError('password')}</div>
+                )}
               </div>
 
-              <div className="text-center">
-                <p className="text-text/70 text-sm">
-                  יש לך כבר חשבון?{' '}
-                  <Link to="/login" className="font-medium text-accent hover:text-accentDark transition-colors">
-                    התחבר עכשיו
-                  </Link>
-                </p>
+              <div className="form-field">
+                <label htmlFor="confirmPassword" className="form-field label">
+                  אימות סיסמה
+                </label>
+                <input 
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={values.confirmPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field ${getFieldError('confirmPassword') ? 'error' : ''}`}
+                  placeholder="הכנס שוב את הסיסמה"
+                />
+                {getFieldError('confirmPassword') && (
+                  <div className="error-text">{getFieldError('confirmPassword')}</div>
+                )}
               </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || loading}
+                className="btn-primary w-full"
+              >
+                {isSubmitting || loading ? (
+                  <ButtonLoading text="יוצר חשבון..." />
+                ) : (
+                  'צור חשבון'
+                )}
+              </button>
+            </form>
+
+            <div className="divider">
+              <div className="divider-text">
+                <span>או</span>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-text/70 mb-4">
+                כבר יש לך חשבון?
+              </p>
+              <Link 
+                to="/login" 
+                className="btn-secondary w-full"
+              >
+                התחבר לחשבון קיים
+              </Link>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   )
 }
 

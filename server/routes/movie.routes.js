@@ -3,7 +3,8 @@ import {
   searchMovies, 
   getMovieById, 
   getMovieWithFullPlot, 
-  searchMoviesAdvanced 
+  searchMoviesAdvanced,
+  getPopularMovies
 } from '../controllers/movie.controller.js'
 
 const router = express.Router()
@@ -13,6 +14,9 @@ router.get('/search', searchMovies)
 
 // Advanced search with filters
 router.get('/search/advanced', searchMoviesAdvanced)
+
+// Get popular movies for home page
+router.get('/popular', getPopularMovies)
 
 // Get movie/series details
 router.get('/:imdbId', getMovieById)

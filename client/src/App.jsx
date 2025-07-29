@@ -1,9 +1,8 @@
 import React from 'react'
-import { RouterProvider } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { AuthLoader } from './routes/RouteGuards'
 import ErrorBoundary from './components/ErrorBoundary'
-import router from './routes/AppRoutes'
-import './styles/index.css'
+import AppRoutes from './routes/AppRoutes'
 
 // TODO: יבא את הרכיבים והדפים הנדרשים
 // TODO: הגדר routing עם React Router
@@ -13,9 +12,11 @@ import './styles/index.css'
 function App() {
   return (
     <ErrorBoundary>
-      <AuthLoader>
-        <RouterProvider router={router} />
-      </AuthLoader>
+      <BrowserRouter>
+        <AuthLoader>
+          <AppRoutes />
+        </AuthLoader>
+      </BrowserRouter>
     </ErrorBoundary>
   )
 }

@@ -12,6 +12,13 @@ const userSchema = new mongoose.Schema({
       movieId: { type: String, required: true },
       addedAt: { type: Date, default: Date.now }
     }
+  ],
+  ratings: [
+    {
+      movieId: { type: String, required: true },
+      rating: { type: Number, required: true, min: 1, max: 5 },
+      ratedAt: { type: Date, default: Date.now }
+    }
   ]
 })
 

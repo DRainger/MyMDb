@@ -13,4 +13,10 @@ export { UserService } from './user.service.js'
 export { WatchlistService } from './watchlist.service.js'
 
 // Movie service
-export { MovieService } from './movie.service.js' 
+export { MovieService } from './movie.service.js'
+
+// Rating service
+export { RatingService } from './rating.service.js'
+
+// Recommendation service
+export { RecommendationService } from './recommendation.service.js' 

@@ -2,7 +2,10 @@ import { MovieService } from '../services/index.js'
 
 export const searchMovies = async (req, res, next) => {
   try {
-    const result = await MovieService.searchMovies(req.query.q)
+    const { q, type, year, page } = req.query
+    
+    // Only pass the query parameter to the service
+    const result = await MovieService.searchMovies(q)
     res.json(result)
   } catch (err) {
     res.status(400).json({ message: err.message })
@@ -29,7 +32,29 @@ export const getMovieWithFullPlot = async (req, res, next) => {
 
 export const searchMoviesAdvanced = async (req, res, next) => {
   try {
-    const result = await MovieService.searchMoviesAdvanced(req.query)
+    // Only pass valid parameters
+    const validParams = {}
+    if (req.query.query) validParams.query = req.query.query
+    if (req.query.type && ['movie', 'series', 'episode'].includes(req.query.type)) {
+      validParams.type = req.query.type
+    }
+    if (req.query.year && /^\d{4}$/.test(req.query.year)) {
+      validParams.year = req.query.year
+    }
+    if (req.query.page && parseInt(req.query.page) > 0) {
+      validParams.page = req.query.page
+    }
+    
+    const result = await MovieService.searchMoviesAdvanced(validParams)
+    res.json(result)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+}
+
+export const getPopularMovies = async (req, res, next) => {
+  try {
+    const result = await MovieService.getPopularMovies()
     res.json(result)
   } catch (err) {
     res.status(400).json({ message: err.message })

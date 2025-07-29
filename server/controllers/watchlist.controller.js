@@ -3,8 +3,8 @@ import { WatchlistService } from '../services/index.js'
 // Get current user's watchlist
 export const getWatchlist = async (req, res, next) => {
   try {
-    const watchlist = await WatchlistService.getUserWatchlist(req.user.id)
-    res.json(watchlist)
+    const result = await WatchlistService.getUserWatchlist(req.user.id)
+    res.json(result)
   } catch (err) {
     res.status(404).json({ message: err.message })
   }
@@ -14,7 +14,7 @@ export const getWatchlist = async (req, res, next) => {
 export const addToWatchlist = async (req, res, next) => {
   try {
     const watchlist = await WatchlistService.addMovieToWatchlist(req.user.id, req.body.movieId)
-    res.status(201).json(watchlist)
+    res.status(201).json({ message: 'Movie added to watchlist', watchlist })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
@@ -24,7 +24,7 @@ export const addToWatchlist = async (req, res, next) => {
 export const removeFromWatchlist = async (req, res, next) => {
   try {
     const watchlist = await WatchlistService.removeMovieFromWatchlist(req.user.id, req.params.movieId)
-    res.json(watchlist)
+    res.json({ message: 'Movie removed from watchlist', watchlist })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
@@ -34,7 +34,7 @@ export const removeFromWatchlist = async (req, res, next) => {
 export const updateWatchlist = async (req, res, next) => {
   try {
     const watchlist = await WatchlistService.updateWatchlist(req.user.id, req.body.watchlist)
-    res.json(watchlist)
+    res.json({ message: 'Watchlist updated', watchlist })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }

@@ -1,9 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import useAuthStore from '../../store/authStore'
+import { useAuth } from '../../hooks'
 
 const HeroSection = () => {
-  const { user } = useAuthStore()
+  const { user } = useAuth()
 
   return (
     <section className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-indigo-800 text-white py-28 overflow-hidden">
