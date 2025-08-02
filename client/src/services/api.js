@@ -91,16 +91,34 @@ export const ratingAPI = {
   removeRating: (movieId) => api.delete(`/ratings/${movieId}`),
   getAverageRating: (movieId) => api.get(`/ratings/average/${movieId}`),
   getUserRatingStats: () => api.get('/ratings/stats'),
-  getRecentRatings: (limit = 10) => api.get(`/ratings/recent?limit=${limit}`),
+  getRecentRatings: (params = {}) => {
+    const { limit = 10 } = params
+    return api.get(`/ratings/recent?limit=${limit}`)
+  },
 }
 
 // Recommendation API
 export const recommendationAPI = {
-  getUserRecommendations: (limit = 10) => api.get(`/recommendations/user?limit=${limit}`),
-  getNewUserRecommendations: (limit = 10) => api.get(`/recommendations/new-user?limit=${limit}`),
-  getTrendingMovies: (limit = 8) => api.get(`/recommendations/trending?limit=${limit}`),
-  getSimilarMovies: (movieId, limit = 6) => api.get(`/recommendations/similar/${movieId}?limit=${limit}`),
-  getPopularMovies: (limit = 10) => api.get(`/recommendations/popular?limit=${limit}`),
+  getUserRecommendations: (params = {}) => {
+    const { limit = 10 } = params
+    return api.get(`/recommendations/user?limit=${limit}`)
+  },
+  getNewUserRecommendations: (params = {}) => {
+    const { limit = 10 } = params
+    return api.get(`/recommendations/new-user?limit=${limit}`)
+  },
+  getTrendingMovies: (params = {}) => {
+    const { limit = 8 } = params
+    return api.get(`/recommendations/trending?limit=${limit}`)
+  },
+  getSimilarMovies: (movieId, params = {}) => {
+    const { limit = 6 } = params
+    return api.get(`/recommendations/similar/${movieId}?limit=${limit}`)
+  },
+  getPopularMovies: (params = {}) => {
+    const { limit = 10 } = params
+    return api.get(`/recommendations/popular?limit=${limit}`)
+  },
 }
 
 // Movie API

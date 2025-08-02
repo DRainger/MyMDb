@@ -77,7 +77,11 @@ export const getRecentRatings = async (req, res, next) => {
   try {
     const { limit = 10 } = req.query
     
-    const result = await RatingService.getRecentRatingsSimple(req.user.id, parseInt(limit))
+    // Handle case where limit might be passed as an object
+    const limitValue = typeof limit === 'object' ? (limit.limit || 10) : parseInt(limit)
+    
+    const result = await RatingService.getRecentRatingsSimple(req.user.id, limitValue)
+    
     res.json(result)
   } catch (err) {
     res.status(404).json({ message: err.message })
@@ -91,5 +95,32 @@ export const fixRatingsWithoutRatedAt = async (req, res, next) => {
     res.json(result)
   } catch (err) {
     res.status(400).json({ message: err.message })
+  }
+} 
+
+// Test endpoint to check database directly
+export const testDatabase = async (req, res, next) => {
+  try {
+    const { default: User } = await import('../models/User.js')
+    
+    // Get all users
+    const allUsers = await User.find()
+    
+    // Get the current user directly
+    const currentUser = await User.findById(req.user.id)
+    
+    res.json({
+      totalUsers: allUsers.length,
+      currentUser: currentUser ? {
+        id: currentUser._id,
+        name: currentUser.name,
+        email: currentUser.email,
+        ratingsCount: currentUser.ratings?.length || 0,
+        ratings: currentUser.ratings?.slice(0, 3) || []
+      } : null,
+      allUserIds: allUsers.map(u => u._id.toString())
+    })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
 } 

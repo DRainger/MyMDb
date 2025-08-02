@@ -64,13 +64,19 @@ const Recommendations = () => {
 
   // Load recommendations based on active tab
   useEffect(() => {
+    console.log('Recommendations useEffect triggered:', { activeTab, user: !!user })
+    
     if (activeTab === 'personalized' && user) {
+      console.log('Fetching personalized recommendations for user:', user.id)
       fetchPersonalized({ limit: 12 })
     } else if (activeTab === 'new-user' && !user) {
+      console.log('Fetching new user recommendations')
       fetchNewUser({ limit: 12 })
     } else if (activeTab === 'trending') {
+      console.log('Fetching trending movies')
       fetchTrending({ limit: 8 })
     } else if (activeTab === 'popular') {
+      console.log('Fetching popular movies')
       fetchPopular({ limit: 10 })
     }
   }, [activeTab, user, fetchPersonalized, fetchNewUser, fetchTrending, fetchPopular])
@@ -181,11 +187,15 @@ const Recommendations = () => {
   }
 
   const renderRecommendations = () => {
+    console.log('renderRecommendations called with currentData:', currentData)
+    
     if (currentData.loading) {
+      console.log('Showing loading state')
       return <LoadingGrid count={6} />
     }
 
     if (currentData.error) {
+      console.log('Showing error state:', currentData.error)
       return (
         <ErrorMessage 
           message={`שגיאה בטעינת המלצות: ${currentData.error}`}
@@ -194,8 +204,14 @@ const Recommendations = () => {
     }
 
     const recommendations = currentData.data?.recommendations || []
+    console.log('Recommendations data:', { 
+      data: currentData.data, 
+      recommendations, 
+      count: recommendations.length 
+    })
 
     if (recommendations.length === 0) {
+      console.log('Showing empty state - no recommendations found')
       return (
         <EmptyState
           icon="🎬"
@@ -207,6 +223,7 @@ const Recommendations = () => {
       )
     }
 
+    console.log('Rendering movie grid with', recommendations.length, 'movies')
     return (
       <MovieGrid
         movies={recommendations}

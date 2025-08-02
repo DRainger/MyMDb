@@ -67,21 +67,12 @@ const Dashboard = () => {
   // Load data when component mounts
   useEffect(() => {
     if (user) {
-      console.log('Loading dashboard data for user:', user.id)
-      
-      // Execute API calls with debugging
+      // Execute API calls
       const loadData = async () => {
         try {
-          console.log('Fetching watchlist count...')
           await fetchWatchlistCount()
-          
-          console.log('Fetching rating stats...')
           await fetchRatingStats()
-          
-          console.log('Fetching recent ratings...')
           await fetchRecentRatings({ limit: 3 })
-          
-          console.log('Fetching recommendations...')
           await fetchRecommendations({ limit: 8 })
         } catch (error) {
           console.error('Error loading dashboard data:', error)
@@ -89,8 +80,6 @@ const Dashboard = () => {
       }
       
       loadData()
-    } else {
-      console.log('No user found, skipping dashboard data load')
     }
   }, [user, fetchWatchlistCount, fetchRatingStats, fetchRecentRatings, fetchRecommendations])
 
@@ -213,24 +202,26 @@ const Dashboard = () => {
                 </button>
               </div>
             ) : recentRatingsData?.ratings?.length > 0 ? (
-              recentRatingsData.ratings.slice(0, 3).map((rating, index) => (
-                <div key={index} className="border-b border-accent/10 pb-2 last:border-b-0">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-text font-medium text-sm truncate">
-                        {rating.movieTitle || 'סרט לא ידוע'}
-                      </p>
-                      <p className="text-text/70 text-xs">
-                        {formatDate(rating.ratedAt)}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-accent font-bold text-sm">{rating.rating}</span>
-                      <span className="text-accent">⭐</span>
+              (() => {
+                return recentRatingsData.ratings.slice(0, 3).map((rating, index) => (
+                  <div key={index} className="border-b border-accent/10 pb-2 last:border-b-0">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-text font-medium text-sm truncate">
+                          {rating.movieTitle || 'סרט לא ידוע'}
+                        </p>
+                        <p className="text-text/70 text-xs">
+                          {formatDate(rating.ratedAt)}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-accent font-bold text-sm">{rating.rating}</span>
+                        <span className="text-accent">⭐</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))
+              })()
             ) : (
               <div className="text-text/70 text-sm">
                 אין פעילות אחרונה

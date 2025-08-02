@@ -4,7 +4,6 @@ import {
   updateUserById,
   getAllUsers
 } from '../dal/index.js'
-import { MovieService } from './movie.service.js'
 
 const logger = createLogger('RATING-SERVICE')
 
@@ -209,12 +208,14 @@ export class RatingService {
     }
   }
 
-  // Get recent ratings for a user (simplified version without OMDB API calls)
+  // Get recent ratings for a user with movie details
   static async getRecentRatingsSimple(userId, limit = 10) {
     try {
-      logger.info(`Getting recent ratings for user ${userId} (simple version)`)
+      logger.info(`Getting recent ratings for user ${userId}`)
       
-      const user = await findUserById(userId)
+      // Use direct database query instead of DAL layer
+      const { default: User } = await import('../models/User.js')
+      const user = await User.findById(userId).lean()
       if (!user) {
         throw new Error('User not found')
       }
@@ -230,9 +231,6 @@ export class RatingService {
         }
       }
       
-      // Log the first few ratings to see their structure
-      logger.info(`Sample ratings:`, ratings.slice(0, 3))
-      
       // Sort by ratedAt descending and limit, handle missing ratedAt
       const recentRatings = ratings
         .map(rating => ({
@@ -242,19 +240,46 @@ export class RatingService {
         .sort((a, b) => new Date(b.ratedAt) - new Date(a.ratedAt))
         .slice(0, limit)
 
-      logger.info(`Processing ${recentRatings.length} recent ratings`)
+      // Fetch movie details for each actual rating
+      const { MovieService } = await import('./movie.service.js')
+      const ratingsWithDetails = []
       
-      // Return basic rating data without movie details
-      const basicRatings = recentRatings.map(rating => ({
-        ...rating,
-        movieTitle: `סרט ${rating.movieId}`,
-        movieYear: null,
-        moviePoster: null
-      }))
+      for (const rating of recentRatings) {
+        try {
+          const movieId = rating.movieId
+          
+          if (!movieId) {
+            logger.warn(`Rating missing movieId, skipping`)
+            continue
+          }
+          
+          // Fetch movie details from OMDB API
+          const movieDetails = await MovieService.getMovieById(movieId)
+          
+          ratingsWithDetails.push({
+            movieId,
+            rating: rating.rating,
+            ratedAt: rating.ratedAt,
+            movieTitle: movieDetails.Title || `סרט ${movieId}`,
+            movieYear: movieDetails.Year || null,
+            moviePoster: movieDetails.Poster || null
+          })
+        } catch (error) {
+          logger.warn(`Failed to fetch details for movie ${rating.movieId}: ${error.message}`)
+          // Fallback to basic info if API call fails
+          ratingsWithDetails.push({
+            movieId: rating.movieId,
+            rating: rating.rating,
+            ratedAt: rating.ratedAt,
+            movieTitle: `סרט ${rating.movieId}`,
+            movieYear: null,
+            moviePoster: null
+          })
+        }
+      }
       
-      logger.info(`Returning ${basicRatings.length} basic ratings`)
       return {
-        ratings: basicRatings,
+        ratings: ratingsWithDetails,
         total: ratings.length
       }
     } catch (error) {

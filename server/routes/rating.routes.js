@@ -8,7 +8,8 @@ import {
   getAverageRating,
   getUserRatingStats,
   getRecentRatings,
-  fixRatingsWithoutRatedAt
+  fixRatingsWithoutRatedAt,
+  testDatabase
 } from '../controllers/rating.controller.js'
 
 const router = express.Router()
@@ -39,5 +40,8 @@ router.delete('/:movieId', removeRating)
 
 // Get average rating for a movie (public endpoint)
 router.get('/average/:movieId', getAverageRating)
+
+// Test route
+router.get('/test', authMiddleware, testDatabase)
 
 export default router 
