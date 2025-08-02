@@ -96,6 +96,51 @@ export class UserService {
     }
   }
 
+  // Change user's password
+  static async changePassword(userId, currentPassword, newPassword) {
+    try {
+      logger.info(`Changing password for user: ${userId}`)
+      
+      // Validate input
+      if (!currentPassword || !newPassword) {
+        throw new Error('Current password and new password are required')
+      }
+      
+      if (newPassword.length < 6) {
+        throw new Error('New password must be at least 6 characters long')
+      }
+      
+      // Get user with password for comparison
+      const { findUserByIdWithPassword } = await import('../dal/index.js')
+      const user = await findUserByIdWithPassword(userId)
+      
+      if (!user) {
+        logger.warn(`User not found for password change: ${userId}`)
+        throw new Error('User not found')
+      }
+      
+      // Verify current password
+      const isCurrentPasswordValid = await user.comparePassword(currentPassword)
+      if (!isCurrentPasswordValid) {
+        logger.warn(`Invalid current password for user: ${userId}`)
+        throw new Error('Current password is incorrect')
+      }
+      
+      // Update password - let the User model handle hashing
+      await updateUserById(userId, { password: newPassword })
+      
+      logger.info(`Password changed successfully for user: ${userId}`)
+      
+      return { 
+        message: 'Password updated successfully',
+        success: true
+      }
+    } catch (error) {
+      logger.error(`Error changing password: ${error.message}`)
+      throw error
+    }
+  }
+
   // Get all users (admin function)
   static async getAllUsers() {
     try {

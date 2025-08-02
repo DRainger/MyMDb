@@ -48,7 +48,14 @@ export const updateUserById = async (userId, updates) => {
     const user = await User.findById(userId)
     if (!user) return null
     
+    // Apply all updates
     Object.assign(user, updates)
+    
+    // Mark password as modified if it was updated
+    if (updates.password) {
+      user.markModified('password')
+    }
+    
     return await user.save()
   } catch (error) {
     throw error
@@ -72,8 +79,6 @@ export const getAllUsers = async () => {
     throw error
   }
 }
-
-
 
 // Check if user exists by email
 export const checkUserExistsByEmail = async (email) => {

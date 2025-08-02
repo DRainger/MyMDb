@@ -4,6 +4,7 @@ import {
   getMe,
   updateMe,
   deleteMe,
+  changePassword,
   getAllUsers,
   getUserById,
   updateUserById,
@@ -15,6 +16,7 @@ const router = express.Router()
 // Self-service endpoints
 router.get('/me', authMiddleware, getMe)
 router.put('/me', authMiddleware, updateMe)
+router.post('/me/change-password', authMiddleware, changePassword)
 router.delete('/me', authMiddleware, deleteMe)
 
 // Admin endpoints (add admin middleware later)

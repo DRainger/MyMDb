@@ -30,6 +30,17 @@ export const deleteMe = async (req, res, next) => {
   }
 }
 
+// Change current user's password
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    const result = await UserService.changePassword(req.user.id, currentPassword, newPassword)
+    res.json(result)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+}
+
 // Admin: Get all users
 export const getAllUsers = async (req, res, next) => {
   try {

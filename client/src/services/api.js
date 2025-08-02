@@ -64,6 +64,7 @@ export const userAPI = {
   getProfile: () => api.get('/users/me'),
   updateProfile: (data) => api.put('/users/me', data),
   deleteProfile: () => api.delete('/users/me'),
+  changePassword: (data) => api.post('/users/me/change-password', data),
   getAllUsers: () => api.get('/users'),
   getUserById: (id) => api.get(`/users/${id}`),
   updateUser: (id, data) => api.put(`/users/${id}`, data),

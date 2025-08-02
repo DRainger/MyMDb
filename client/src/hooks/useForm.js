@@ -117,6 +117,7 @@ export const useForm = (initialValues = {}, validationRules = {}) => {
     setFormValues,
     getFieldError,
     validateForm,
-    validateField
+    validateField,
+    setValues
   }
 } 
